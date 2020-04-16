@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.main
 
 import android.content.Context
+import android.os.SystemClock
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -91,21 +93,19 @@ class MainVerticalAdapter(
             var time: Date? = null
             try {
                 time =
-                    SimpleDateFormat("hh:mm:ss", Locale.ENGLISH).parse(item.elapsed.substring(0, 8))
+                    SimpleDateFormat("HH:mm:ss", Locale.ENGLISH).parse(item.elapsed.substring(0, 8))
             } catch (ex: Exception) {
+                Log.w("Time parce", ex)
             }
 
-            val calendar = Calendar.getInstance()
-            calendar.time = time
-            val hours = calendar[Calendar.HOUR_OF_DAY]
-            val minutes = calendar[Calendar.MINUTE]
-            val seconds = calendar[Calendar.SECOND]
 
             time?.let {
                 val millis =
-                    TimeUnit.SECONDS.toMillis(seconds.toLong()) + TimeUnit.MINUTES.toMillis(minutes.toLong()) + TimeUnit.HOURS.toMillis(hours.toLong())
+                    TimeUnit.SECONDS.toMillis(it.seconds.toLong()) + TimeUnit.MINUTES.toMillis(it.minutes.toLong()) + TimeUnit.HOURS.toMillis(
+                        it.hours.toLong()
+                    )
 
-                view.elapsed.base = millis
+                view.elapsed.base = SystemClock.elapsedRealtime() - millis
                 view.elapsed.start()
             }
         }
