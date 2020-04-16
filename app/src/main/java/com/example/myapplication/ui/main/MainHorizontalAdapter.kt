@@ -18,11 +18,10 @@ class MainHorizontalAdapter(
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var headline: List<HeadlineViewData> = listOf()
     private var recyclerView: RecyclerView? = null
-    private var viewHolder: HorizontalViewHolder? = null
 
     fun updateHeadlineItems(headline: List<HeadlineViewData>?) {
         headline?.let {
-            this.headline = headline
+            this.headline = it
             notifyDataSetChanged()
         }
     }
@@ -41,8 +40,8 @@ class MainHorizontalAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        viewHolder = (holder as HorizontalViewHolder)
-        if (headline.isNotEmpty()) (holder).bind(headline[position])
+
+        if (headline.isNotEmpty()) (holder as HorizontalViewHolder).bind(headline[position])
     }
 
     inner class HorizontalViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
@@ -55,15 +54,13 @@ class MainHorizontalAdapter(
 
     private fun startUpdateTask() {
         val scheduleTaskExecutor = Executors.newScheduledThreadPool(2)
-        var newPosition=1
+        var newPosition = 1
         scheduleTaskExecutor.scheduleAtFixedRate({
             run {
-                viewHolder?.let {
-                    if (newPosition+1>headline.size) newPosition=0
+                if (newPosition + 1 > headline.size) newPosition = 0
 
-                    recyclerView?.smoothScrollToPosition(newPosition)
-                    newPosition++
-                }
+                recyclerView?.smoothScrollToPosition(newPosition)
+                newPosition++
             }
         }, 25, 5, TimeUnit.SECONDS)
 

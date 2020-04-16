@@ -12,9 +12,7 @@ import java.util.concurrent.TimeUnit
 
 
 class MainViewModel : ViewModel() {
-    //var games = MutableLiveData<Game?>()
 
-    var headLines = MutableLiveData<Headline?>()
     var headlineListLD = MutableLiveData<MutableList<HeadlineViewData>>()
     private var auth: String? = null
     private val user = "Dim"
@@ -35,13 +33,13 @@ class MainViewModel : ViewModel() {
     private fun fetchInitialList(auth: String?) {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                val reqGames = repository.getGames(auth)
-                val reqHeadline = repository.getHeadlines(auth)
+                val reqGames = repository.getGames(it)
+                val reqHeadline = repository.getHeadlines(it)
 
                 val game = reqGames.body()
                 game?.let {
                     val list: MutableList<GameViewData> = mutableListOf()
-                    for (competition in game[0].betViews[0].competitions) {
+                    for (competition in it[0].betViews[0].competitions) {
                         for (event in competition.events) {
                             list.add(
                                 GameViewData(
@@ -61,7 +59,7 @@ class MainViewModel : ViewModel() {
                 val headline = reqHeadline.body()
                 headline?.let {
                     val list = mutableListOf<HeadlineViewData>()
-                    for (betview in headline[0].betViews) {
+                    for (betview in it[0].betViews) {
                         list.add(
                             HeadlineViewData(
                                 betview.competitor1Caption,
@@ -79,17 +77,15 @@ class MainViewModel : ViewModel() {
     private fun updateGames(auth: String?) {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                val req = repository.getUpdatedGames(auth)
+                val req = repository.getUpdatedGames(it)
 
                 val game = req.body()
                 game?.let {
                     val list: MutableList<GameViewData> = mutableListOf()
-                    for (competition in game[0].betViews[0].competitions) {
+                    for (competition in it[0].betViews[0].competitions) {
                         for (event in competition.events) {
 
-                            if (gamesListLD.value!!.any { item -> item.id == event.betContextId }) {
-
-                            } else {
+                            gamesListLD.value!!.any { item -> item.id != event.betContextId }.let {
                                 list.add(
                                     GameViewData(
                                         event.betContextId,
@@ -114,11 +110,11 @@ class MainViewModel : ViewModel() {
     private fun updateHeadalines(auth: String?) {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                val req = repository.getUpdatedHeadlines(auth)
+                val req = repository.getUpdatedHeadlines(it)
                 val headline = req.body()
                 headline?.let {
                     val list = mutableListOf<HeadlineViewData>()
-                    for (betview: BetView? in headline[0].betViews) {
+                    for (betview: BetView? in it[0].betViews) {
                         betview?.competitor1Caption?.let {
                             list.add(
                                 HeadlineViewData(

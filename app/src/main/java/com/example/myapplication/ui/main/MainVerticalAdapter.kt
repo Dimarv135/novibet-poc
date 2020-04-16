@@ -8,11 +8,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.model.GameViewData
-import com.example.myapplication.model.Headline
 import com.example.myapplication.model.HeadlineViewData
 import kotlinx.android.synthetic.main.game_item.view.*
 import kotlinx.android.synthetic.main.horizontal_recycler.view.*
-import java.util.concurrent.Executors
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainVerticalAdapter(
@@ -27,14 +27,14 @@ class MainVerticalAdapter(
 
     fun updateHeadline(headline: List<HeadlineViewData>?) {
         headline?.let {
-            horizontalAdapter.updateHeadlineItems(headline)
+            horizontalAdapter.updateHeadlineItems(it)
         }
     }
 
 
     fun updateGames(games: List<GameViewData>?) {
         games?.let {
-            this.games = games
+            this.games = it
             notifyDataSetChanged()
         }
 
@@ -82,17 +82,36 @@ class MainVerticalAdapter(
         }
     }
 
-    inner class GameViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class GameViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         fun bind(item: GameViewData) {
             view.gameCompetitor1.text = item.competitor1
 
             view.gameCompetitor2.text = item.competitor2
 
-            view.elapsed.text = item.elapsed.substring(0, 8)
+            var time: Date? = null
+            try {
+                time =
+                    SimpleDateFormat("hh:mm:ss", Locale.ENGLISH).parse(item.elapsed.substring(0, 8))
+            } catch (ex: Exception) {
+            }
+
+            val calendar = Calendar.getInstance()
+            calendar.time = time
+            val hours = calendar[Calendar.HOUR_OF_DAY]
+            val minutes = calendar[Calendar.MINUTE]
+            val seconds = calendar[Calendar.SECOND]
+
+            time?.let {
+                val millis =
+                    TimeUnit.SECONDS.toMillis(seconds.toLong()) + TimeUnit.MINUTES.toMillis(minutes.toLong()) + TimeUnit.HOURS.toMillis(hours.toLong())
+
+                view.elapsed.base = millis
+                view.elapsed.start()
+            }
         }
     }
 
-    inner class HorizontalViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class HorizontalViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         fun bind() {
             view.horizRecycler.layoutManager = layoutManager
             view.horizRecycler.adapter = horizontalAdapter
