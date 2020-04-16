@@ -89,7 +89,6 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<BaseAdapter<T>.BaseViewHold
     }
 
     fun removeItem(index: Int) {
-        val size = itemCount
         data.removeAt(index)
         notifyItemRemoved(index)
     }
