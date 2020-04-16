@@ -6,33 +6,71 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
-import com.example.myapplication.base.BaseAdapter
-import com.example.myapplication.model.Headline
+import com.example.myapplication.model.HeadlineViewData
 import kotlinx.android.synthetic.main.headline_item.view.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
-class MainHorizontalAdapter(private val headline: Headline, private val context: Context?) :
+class MainHorizontalAdapter(
+    private val context: Context?
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var headline: List<HeadlineViewData> = listOf()
+    private var recyclerView: RecyclerView? = null
+    private var viewHolder: HorizontalViewHolder? = null
+
+    fun updateHeadlineItems(headline: List<HeadlineViewData>?) {
+        headline?.let {
+            this.headline = headline
+            notifyDataSetChanged()
+        }
+    }
+
+    init {
+        startUpdateTask()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         HorizontalViewHolder(
             LayoutInflater.from(context).inflate(R.layout.headline_item, parent, false)
         )
 
     override fun getItemCount(): Int {
-
-        return if (headline.size != 0) headline[0].betViews.size else 0
+        return if (headline.isNotEmpty()) headline.size else 0
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as HorizontalViewHolder).bind(headline)
+        viewHolder = (holder as HorizontalViewHolder)
+        if (headline.isNotEmpty()) (holder).bind(headline[position])
     }
 
     inner class HorizontalViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(item: Headline) {
-            view.competitor1.text = item[0].betViews[adapterPosition].competitor1Caption
-            view.competitor2.text = item[0].betViews[adapterPosition].competitor2Caption
-            view.startTime.text = item[0].betViews[adapterPosition].startTime
+        fun bind(item: HeadlineViewData) {
+            view.competitor1.text = item.competitor1
+            view.competitor2.text = item.competitor2
+            view.startTime.text = item.time
         }
     }
 
+    private fun startUpdateTask() {
+        val scheduleTaskExecutor = Executors.newScheduledThreadPool(2)
+        var newPosition=1
+        scheduleTaskExecutor.scheduleAtFixedRate({
+            run {
+                viewHolder?.let {
+                    if (newPosition+1>headline.size) newPosition=0
+
+                    recyclerView?.smoothScrollToPosition(newPosition)
+                    newPosition++
+                }
+            }
+        }, 25, 5, TimeUnit.SECONDS)
+
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
 }

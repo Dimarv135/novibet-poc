@@ -3,36 +3,41 @@ package com.example.myapplication.ui.main
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.inflate
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
-import com.example.myapplication.base.BaseAdapter
-import com.example.myapplication.model.Game
-import com.example.myapplication.model.GameLiveData
 import com.example.myapplication.model.GameViewData
 import com.example.myapplication.model.Headline
-import kotlinx.android.synthetic.main.game_item.*
+import com.example.myapplication.model.HeadlineViewData
 import kotlinx.android.synthetic.main.game_item.view.*
 import kotlinx.android.synthetic.main.horizontal_recycler.view.*
-import kotlinx.android.synthetic.main.main_fragment.view.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
-class MainVerticalAdapter(var games: List<GameViewData>, var headline: Headline, val context: Context?) :
+class MainVerticalAdapter(
+    val context: Context?
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    fun updateHeadline(headline: Headline?) {
+    var games: List<GameViewData> = listOf()
+    var horizontalAdapter = MainHorizontalAdapter(context)
+    var layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+
+    fun updateHeadline(headline: List<HeadlineViewData>?) {
         headline?.let {
-            this.headline = headline
+            horizontalAdapter.updateHeadlineItems(headline)
         }
-        notifyItemRangeChanged(0,itemCount)
     }
+
 
     fun updateGames(games: List<GameViewData>?) {
         games?.let {
             this.games = games
+            notifyDataSetChanged()
         }
-        notifyItemRangeChanged(1,itemCount)
+
     }
 
 
@@ -61,19 +66,19 @@ class MainVerticalAdapter(var games: List<GameViewData>, var headline: Headline,
     }
 
     override fun getItemCount(): Int {
-     var count=1
-        if (games.isNotEmpty()){
-            count+=games.size
+        var count = 1
+        if (games.isNotEmpty()) {
+            count += games.size
         }
 
-     return   count
+        return count
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is GameViewHolder) {
-            holder.bind(games[position-1])
+            holder.bind(games[position - 1])
         } else if (holder is HorizontalViewHolder) {
-            holder.bind(headline)
+            holder.bind()
         }
     }
 
@@ -83,15 +88,14 @@ class MainVerticalAdapter(var games: List<GameViewData>, var headline: Headline,
 
             view.gameCompetitor2.text = item.competitor2
 
-            view.elapsed.text = item.elapsed.substring(0,8)
+            view.elapsed.text = item.elapsed.substring(0, 8)
         }
     }
 
     inner class HorizontalViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(item: Headline) {
-
-            view.horizRecycler.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            view.horizRecycler.adapter = MainHorizontalAdapter(headline, context)
+        fun bind() {
+            view.horizRecycler.layoutManager = layoutManager
+            view.horizRecycler.adapter = horizontalAdapter
         }
     }
 }

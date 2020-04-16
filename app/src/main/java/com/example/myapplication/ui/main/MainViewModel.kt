@@ -1,9 +1,10 @@
 package com.example.myapplication.ui.main
 
 import androidx.lifecycle.*
-import com.example.myapplication.model.Game
+import com.example.myapplication.model.BetView
 import com.example.myapplication.model.GameViewData
 import com.example.myapplication.model.Headline
+import com.example.myapplication.model.HeadlineViewData
 import com.example.myapplication.repository.MainRepository
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
@@ -11,14 +12,15 @@ import java.util.concurrent.TimeUnit
 
 
 class MainViewModel : ViewModel() {
-    var games = MutableLiveData<Game?>()
+    //var games = MutableLiveData<Game?>()
 
     var headLines = MutableLiveData<Headline?>()
+    var headlineListLD = MutableLiveData<MutableList<HeadlineViewData>>()
     private var auth: String? = null
     private val user = "Dim"
     private val pass = "123"
-    var gamesList = MutableLiveData<MutableList<GameViewData>>()
-
+    var gamesListLD = MutableLiveData<MutableList<GameViewData>>()
+    var gamelist: MutableList<GameViewData> = mutableListOf()
 
     init {
         viewModelScope.launch {
@@ -38,7 +40,7 @@ class MainViewModel : ViewModel() {
 
                 val game = reqGames.body()
                 game?.let {
-                    var list: MutableList<GameViewData> = mutableListOf()
+                    val list: MutableList<GameViewData> = mutableListOf()
                     for (competition in game[0].betViews[0].competitions) {
                         for (event in competition.events) {
                             list.add(
@@ -51,12 +53,25 @@ class MainViewModel : ViewModel() {
                             )
                         }
                     }
-                    gamesList.postValue(list)
+                    gamelist.addAll(list)
+                    gamesListLD.postValue(list)
                     //games.postValue(req.body())
 
                 }
-                //games.postValue(reqGames.body())
-                headLines.postValue(reqHeadline.body())
+                val headline = reqHeadline.body()
+                headline?.let {
+                    val list = mutableListOf<HeadlineViewData>()
+                    for (betview in headline[0].betViews) {
+                        list.add(
+                            HeadlineViewData(
+                                betview.competitor1Caption,
+                                betview.competitor2Caption,
+                                betview.startTime
+                            )
+                        )
+                    }
+                    headlineListLD.postValue(list)
+                }
             }
         }
     }
@@ -65,13 +80,14 @@ class MainViewModel : ViewModel() {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
                 val req = repository.getUpdatedGames(auth)
-                //item[0].betViews[0].competitions[adapterPosition-1].events[0].additionalCaptions
+
                 val game = req.body()
                 game?.let {
-                    var list: MutableList<GameViewData> = mutableListOf()
+                    val list: MutableList<GameViewData> = mutableListOf()
                     for (competition in game[0].betViews[0].competitions) {
                         for (event in competition.events) {
-                            if (gamesList.value!!.any { item -> item.id == event.betContextId }) {
+
+                            if (gamesListLD.value!!.any { item -> item.id == event.betContextId }) {
 
                             } else {
                                 list.add(
@@ -85,11 +101,10 @@ class MainViewModel : ViewModel() {
                             }
                         }
                     }
-                    withContext(Dispatchers.Main) {
-                        gamesList.value?.addAll(list)
-                    }
 
-                    //games.postValue(req.body())
+                    gamelist.addAll(list)
+
+                    if (gamesListLD.value != gamelist) gamesListLD.postValue(gamelist)
 
                 }
             }
@@ -100,7 +115,23 @@ class MainViewModel : ViewModel() {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
                 val req = repository.getUpdatedHeadlines(auth)
-                headLines.postValue(req.body())
+                val headline = req.body()
+                headline?.let {
+                    val list = mutableListOf<HeadlineViewData>()
+                    for (betview: BetView? in headline[0].betViews) {
+                        betview?.competitor1Caption?.let {
+                            list.add(
+                                HeadlineViewData(
+                                    betview.competitor1Caption,
+                                    betview.competitor2Caption,
+                                    betview.startTime
+                                )
+                            )
+                        }
+                    }
+                    if (headlineListLD.value != list) headlineListLD.postValue(list)
+                }
+                // headLines.postValue(req.body())
             }
         }
     }

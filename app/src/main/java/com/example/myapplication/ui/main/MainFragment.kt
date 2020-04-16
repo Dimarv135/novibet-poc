@@ -10,8 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
-import com.example.myapplication.model.Game
-import com.example.myapplication.model.GameViewData
 import com.example.myapplication.model.Headline
 import kotlinx.android.synthetic.main.main_fragment.*
 
@@ -34,12 +32,12 @@ class MainFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         val viewModel:MainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         mainRecycler.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        val adapter = MainVerticalAdapter(emptyList(), Headline(), context)
+        val adapter = MainVerticalAdapter(context)
         mainRecycler.adapter = adapter
-        viewModel.headLines.observe(activity as MainActivity, Observer {
+        viewModel.headlineListLD.observe(activity as MainActivity, Observer {
             adapter.updateHeadline(it)
         })
-        viewModel.gamesList.observe(activity as MainActivity, Observer {
+        viewModel.gamesListLD.observe(activity as MainActivity, Observer {
             adapter.updateGames(it)
         })
 
