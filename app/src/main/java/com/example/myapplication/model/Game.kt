@@ -9,7 +9,7 @@ data class GameItem(
     val marketViewKey: String,
     val marketViewType: String,
     val modelType: String,
-    val totalCount: Int
+    val totalCount: Number
 )
 
 data class GameBetView(
@@ -18,11 +18,11 @@ data class GameBetView(
     val competitions: List<Competition>,
     val marketCaptions: List<MarketCaption>,
     val modelType: String,
-    val totalCount: Int
+    val totalCount: Number
 )
 
 data class Competition(
-    val betContextId: Int,
+    val betContextId: Number,
     val caption: String,
     val events: List<Event>,
     val regionCaption: String
@@ -36,7 +36,7 @@ data class MarketCaption(
 
 data class Event(
     val additionalCaptions: AdditionalCaptions,
-    val betContextId: Int,
+    val betContextId: Number,
     val hasBetContextInfo: Boolean,
     val isHighlighted: Boolean,
     val liveData: GameLiveData,
@@ -46,39 +46,39 @@ data class Event(
 
 data class AdditionalCaptions(
     val competitor1: String,
-    val competitor1ImageId: Int,
+    val competitor1ImageId: Number,
     val competitor2: String,
-    val competitor2ImageId: Int,
-    val type: Int
+    val competitor2ImageId: Number,
+    val type: Number
 )
 
 data class GameLiveData(
-    val adjustTimeMillis: Int,
-    val awayCorners: Int,
-    val awayGoals: Int,
-    val awayPenaltyKicks: Int,
-    val awayRedCards: Int,
-    val awayYellowCards: Int,
+    val adjustTimeMillis: Number,
+    val awayCorners: Number,
+    val awayGoals: Number,
+    val awayPenaltyKicks: Number,
+    val awayRedCards: Number,
+    val awayYellowCards: Number,
     val duration: Any,
     val durationSeconds: Any,
     val elapsed: String,
     val elapsedSeconds: Double,
-    val homeCorners: Int,
-    val homeGoals: Int,
-    val homePenaltyKicks: Int,
-    val homeRedCards: Int,
-    val homeYellowCards: Int,
+    val homeCorners: Number,
+    val homeGoals: Number,
+    val homePenaltyKicks: Number,
+    val homeRedCards: Number,
+    val homeYellowCards: Number,
     val isInPlay: Boolean,
     val isInPlayPaused: Boolean,
-    val isInterrupted: Boolean,
+    val isNumbererrupted: Boolean,
     val isLive: Boolean,
     val liveStreamingCountries: Any,
     val phaseCaption: String,
     val phaseCaptionLong: String,
     val phaseSysname: String,
     val referenceTime: String,
-    val referenceTimeUnix: Int,
-    val sportradarMatchId: Int,
+    val referenceTimeUnix: Number,
+    val sportradarMatchId: Number,
     val supportsAchievements: Boolean,
     val supportsActions: Boolean,
     val timeToNextPhase: Any,
@@ -89,13 +89,13 @@ data class GameLiveData(
 data class Market(
     val betItems: List<GameBetItem>,
     val betTypeSysname: String,
-    val marketId: Int
+    val marketId: Number
 )
 
 data class GameBetItem(
     val caption: String,
     val code: String,
-    val id: Int,
+    val id: Number,
     val instanceCaption: Any,
     val isAvailable: Boolean,
     val oddsText: String,

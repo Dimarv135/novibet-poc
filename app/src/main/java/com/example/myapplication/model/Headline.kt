@@ -11,20 +11,20 @@ data class HeadlineItem(
 )
 
 data class BetView(
-    val betContextId: Int,
+    val betContextId: Number,
     val betItems: List<BetItem>,
     val betViewKey: String,
     val competitor1Caption: String,
     val competitor2Caption: String,
     val displayFormat: String,
-    val imageId: Int,
+    val imageId: Number,
     val liveData: LiveData,
     val marketTags: List<Any>,
-    val marketViewGroupId: Int,
-    val marketViewId: Int,
+    val marketViewGroupId: Number,
+    val marketViewId: Number,
     val modelType: String,
     val path: String,
-    val rootMarketViewGroupId: Int,
+    val rootMarketViewGroupId: Number,
     val startTime: String,
     val text: String,
     val url: Any
@@ -33,25 +33,25 @@ data class BetView(
 data class BetItem(
     val caption: String,
     val code: String,
-    val id: Int,
+    val id: Number,
     val instanceCaption: String,
     val isAvailable: Boolean,
     val oddsText: String,
-    val price: Int
+    val price: Number
 )
 
 data class LiveData(
-    val adjustTimeMillis: Int,
-    val awayPoints: Int,
+    val adjustTimeMillis: Number,
+    val awayPoNumbers: Number,
     val duration: String,
-    val durationSeconds: Int,
+    val durationSeconds: Number,
     val elapsed: String,
     val elapsedSeconds: Double,
-    val homePoints: Int,
+    val homePoNumbers: Number,
     val homePossession: Boolean,
     val isInPlay: Boolean,
     val isInPlayPaused: Boolean,
-    val isInterrupted: Boolean,
+    val isNumbererrupted: Boolean,
     val isLive: Boolean,
     val liveStreamingCountries: String,
     val phaseCaption: String,
@@ -59,10 +59,10 @@ data class LiveData(
     val phaseSysname: String,
     val quarterScores: List<QuarterScore>,
     val referenceTime: String,
-    val referenceTimeUnix: Int,
+    val referenceTimeUnix: Number,
     val remaining: String,
     val remainingSeconds: Double,
-    val sportradarMatchId: Int,
+    val sportradarMatchId: Number,
     val supportsAchievements: Boolean,
     val supportsActions: Boolean,
     val timeToNextPhase: Any,
@@ -71,7 +71,7 @@ data class LiveData(
 )
 
 data class QuarterScore(
-    val awayScore: Int,
+    val awayScore: Number,
     val caption: String,
-    val homeScore: Int
+    val homeScore: Number
 )

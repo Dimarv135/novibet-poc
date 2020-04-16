@@ -23,43 +23,10 @@ class MainRepository {
     suspend fun getUpdatedGames(auth:String) = service.getUpdatedGames(auth)
 
 
-    /* fun login(auth:Muta): Login? {
 
-         CoroutineScope(Dispatchers.IO).launch {
-             val req = service.login()
-
-             Log.d(req.toString(), "tag")
-             return req.body()
-         }
-     }*/
-
-    /* fun getHeadlines(): Headline? {
-         val req = service.getHeadlines()
-         Log.d(req.request().toString(), "tag")
-         return req.execute().body()
-     }
-
-     fun getGames(): Game? {
-         val req = service.getGames()
-
-         Log.d(req.request().toString(), "tag")
-         return req.execute().body()
-     }
-
-     fun getUpdatedHeadlines(): Headline? {
-         val req = service.getUpdatedHeadlines()
-         Log.d(req.request().toString(), "tag")
-         return req.execute().body()
-     }
-
-     fun getUpdatedGames(): Game? {
-         val req = service.getUpdatedGames()
-         Log.d(req.request().toString(), "tag")
-         return req.execute().body()
-     }*/
 
     companion object {
-        private val BASE_URL = "http://www.mocky.io/v2"
+        private val BASE_URL = "http://www.mocky.io/"
 
         fun create(): MainService {
             val retrofit = Retrofit.Builder()

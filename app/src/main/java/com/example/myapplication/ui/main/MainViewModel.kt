@@ -1,64 +1,113 @@
 package com.example.myapplication.ui.main
 
-import android.app.Application
-import android.os.AsyncTask
 import androidx.lifecycle.*
 import com.example.myapplication.model.Game
+import com.example.myapplication.model.GameViewData
 import com.example.myapplication.model.Headline
-import com.example.myapplication.model.Login
 import com.example.myapplication.repository.MainRepository
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.fixedRateTimer
-import kotlin.concurrent.thread
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private var games = MutableLiveData<Game?>()
-    private var headLines = MutableLiveData<Headline?>()
+
+class MainViewModel : ViewModel() {
+    var games = MutableLiveData<Game?>()
+
+    var headLines = MutableLiveData<Headline?>()
     private var auth: String? = null
     private val user = "Dim"
     private val pass = "123"
+    var gamesList = MutableLiveData<MutableList<GameViewData>>()
 
 
     init {
-        val login: LiveData<String> = liveData(Dispatchers.IO) {
-            val response = repository.login(user,pass)
-            auth = "${response.body().token_type} ${response.body().access_token}"
+        viewModelScope.launch {
+            val response = repository.login(user, pass)
+            auth = "${response.body()?.token_type} ${response.body()?.access_token}"
             fetchInitialList(auth)
         }
         startUpdateTask()
     }
 
 
-    fun fetchInitialList(auth: String?) {
+    private fun fetchInitialList(auth: String?) {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                games.value = repository.getGames(auth).body()
-                headLines.value = repository.getHeadlines(auth).body()
+                val reqGames = repository.getGames(auth)
+                val reqHeadline = repository.getHeadlines(auth)
+
+                val game = reqGames.body()
+                game?.let {
+                    var list: MutableList<GameViewData> = mutableListOf()
+                    for (competition in game[0].betViews[0].competitions) {
+                        for (event in competition.events) {
+                            list.add(
+                                GameViewData(
+                                    event.betContextId,
+                                    event.additionalCaptions.competitor1,
+                                    event.additionalCaptions.competitor2,
+                                    event.liveData.elapsed
+                                )
+                            )
+                        }
+                    }
+                    gamesList.postValue(list)
+                    //games.postValue(req.body())
+
+                }
+                //games.postValue(reqGames.body())
+                headLines.postValue(reqHeadline.body())
             }
         }
     }
 
-    fun updateGames(auth: String?) {
+    private fun updateGames(auth: String?) {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                games.postValue(repository.getUpdatedGames(auth).body())
+                val req = repository.getUpdatedGames(auth)
+                //item[0].betViews[0].competitions[adapterPosition-1].events[0].additionalCaptions
+                val game = req.body()
+                game?.let {
+                    var list: MutableList<GameViewData> = mutableListOf()
+                    for (competition in game[0].betViews[0].competitions) {
+                        for (event in competition.events) {
+                            if (gamesList.value!!.any { item -> item.id == event.betContextId }) {
+
+                            } else {
+                                list.add(
+                                    GameViewData(
+                                        event.betContextId,
+                                        event.additionalCaptions.competitor1,
+                                        event.additionalCaptions.competitor2,
+                                        event.liveData.elapsed
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    withContext(Dispatchers.Main) {
+                        gamesList.value?.addAll(list)
+                    }
+
+                    //games.postValue(req.body())
+
+                }
             }
         }
     }
 
-    fun updateHeadalines(auth: String?) {
+    private fun updateHeadalines(auth: String?) {
         auth?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                headLines.postValue(repository.getUpdatedHeadlines(auth).body())
+                val req = repository.getUpdatedHeadlines(auth)
+                headLines.postValue(req.body())
             }
         }
     }
 
-    val scheduleTaskExecutor = Executors.newScheduledThreadPool(2)
 
-    fun startUpdateTask() {
+    private fun startUpdateTask() {
+        val scheduleTaskExecutor = Executors.newScheduledThreadPool(2)
         scheduleTaskExecutor.scheduleAtFixedRate({
             run {
                 updateGames(auth)
