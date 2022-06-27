@@ -6,11 +6,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.model.GameViewData
 import com.example.myapplication.model.HeadlineViewData
+import com.example.myapplication.utils.GameDiffUtil
 import kotlinx.android.synthetic.main.game_item.view.*
 import kotlinx.android.synthetic.main.horizontal_recycler.view.*
 import java.text.SimpleDateFormat
@@ -36,8 +38,10 @@ class MainVerticalAdapter(
 
     fun updateGames(games: List<GameViewData>?) {
         games?.let {
-            this.games = it
-            notifyDataSetChanged()
+            val diffUtil=GameDiffUtil(this.games, it)
+            val diffResult=DiffUtil.calculateDiff(diffUtil)
+            this.games=it
+            diffResult.dispatchUpdatesTo(this)
         }
 
     }
@@ -68,12 +72,7 @@ class MainVerticalAdapter(
     }
 
     override fun getItemCount(): Int {
-        var count = 1
-        if (games.isNotEmpty()) {
-            count += games.size
-        }
-
-        return count
+        return if(games.isNotEmpty()) games.size+1 else 1
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -90,19 +89,21 @@ class MainVerticalAdapter(
 
             view.gameCompetitor2.text = item.competitor2
 
-            var time: Date? = null
+            var date: Date? = null
             try {
-                time =
+                date =
                     SimpleDateFormat("HH:mm:ss", Locale.ENGLISH).parse(item.elapsed.substring(0, 8))
             } catch (ex: Exception) {
                 Log.w("Time parce", ex)
             }
-
-
-            time?.let {
+            val calendar = Calendar.getInstance()
+            date?.let {
+                calendar.time = it
+            }
+            calendar.let {
                 val millis =
-                    TimeUnit.SECONDS.toMillis(it.seconds.toLong()) + TimeUnit.MINUTES.toMillis(it.minutes.toLong()) + TimeUnit.HOURS.toMillis(
-                        it.hours.toLong()
+                    TimeUnit.SECONDS.toMillis(it.get(Calendar.SECOND).toLong()) + TimeUnit.MINUTES.toMillis(it.get(Calendar.MINUTE).toLong()) + TimeUnit.HOURS.toMillis(
+                        it.get(Calendar.HOUR).toLong()
                     )
 
                 view.elapsed.base = SystemClock.elapsedRealtime() - millis

@@ -3,7 +3,7 @@ package com.example.myapplication.model
 class Headline : ArrayList<HeadlineItem>()
 
 data class HeadlineItem(
-    val betViews: List<BetView>,
+    val betViews: List<BetView?>,
     val caption: String,
     val marketViewKey: String,
     val marketViewType: String,
